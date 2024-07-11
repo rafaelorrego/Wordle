@@ -1,98 +1,57 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const board = document.getElementById('board');
+    const input = document.getElementById('input');
+    const submitButton = document.getElementById('submit');
+    const secretWord = 'POLLO'; //palabra secreta 
 
-
-var height = 6; // numero de letras 
-var width = 5 // longitud de la palabra
-
-var fila = 0; // numero de intento
-var col = 0; // letra actual para ese intento 
-
-var gameOver = false;
-var palabra = "pollo";
-
-
-// para que cuando se carga la pagina se llame a una funcion que voy  a crear
-window.onload = function () {
-    recarga()
-}
-// inicializan despues de la recargas del tablero 
-function recarga() {
-
-    // creamos el teblero de intentos para no ir creando en html
-    for (let f = 0; f < height; f++) {
-        for (let c = 0; c < width; c++) {
-
-            let tile = document.createElement("span");
-            tile.id = f.toString() + "-" + c.toString();
-            tile.classList.add("tile");
-            tile.innerText = "";
-            document.getElementById("tablero").appendChild(tile);
+    let attempts = 0;
+    //creo el tablero de juego
+    function createBoard() {
+        for (let i = 0; i < 30; i++) { 
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            board.appendChild(cell);
         }
     }
-
-    // para saber que botones presionamos los botones 
-    document.addEventListener("keyup", (e) => {
-        //if (gameOver) return;
-        //ver que teclas presionamos 
-        // alert ( e.code);
-        //en el siguiente if limitamos a que solo se ouedan presionar teclas de la "A" a la "Z"
-        if ("keyA" <= e.code && e.code <= "keyZ") {
-
-
-            //" REVISAR EL ERROR QUE TENNNNGO EN ACTUAL TILE"
-            if (col < width) { 
-                if (actualTile.innerText == "") {
-                    actualTile = document.getElementById(fila.toString() + "-" + col.toString());
-                    actualTile.innerText = e.code[3];
-                    col = col +1;
-
-                }
-            }
-            // para borrar las teclas  o palabras 
-        }else if (e.code == "Backspace"){
-            if (0 < col && col <= width) {
-                col = col -1;
-            
-                actualTile.innerText = "";
-                actualTile = document.getElementById(fila.toString() + '-' + col.toString());
+    //Verificamos palabras en posiciones si es correcta o no 
+    function updateBoard(guess) {
+        const cells = board.querySelectorAll('.cell');
+        for (let i = 0; i < guess.length; i++) {
+            const cell = cells[attempts * 5 + i];
+            cell.textContent = guess[i];
+            if (guess[i] === secretWord[i]) {
+                cell.classList.add('correct');
+            } else if (secretWord.includes(guess[i])) {
+                cell.classList.add('present');
+            } else {
+                cell.classList.add('absent');
             }
         }
-        else if (e.code == "enter"){
-            recarga();
-            fila= fila + 1; //empezamos de una nueva fila 
-            col = 0; // empezamos de cero 
-        }
-        if (!gameOver && fila == height) {
-            gameOver = true;
-            document.getElementById("respuesta").innerText = palabra;
-        }
-
-        
-    })
-}
-function recarga(){
-    let acerto = 0;
-    let contadorletra = {};//para hacer un tipo de mapa ej (P:1 O:2 L:1 L:4 )
-
-
-    for( let c = 0; c < width; c++ ){
-       let  actualTile= document.getElementById(fila.toString() + "-" + c.toString());
-       let  letra = actualTile.innerText;
-
-       //para saber si estamos enla posicion correcta 
-        if (palabra[c] == letra){
-            actualTile.classList.add("correcto");
-            correcto = correcto + 1;
-        }
-        //esta en la palabra ??
-        else if (word.includes9(letra)){
-            actualTile.classList.add("presente")
-        }
-        // no esta en la palabra
-        else{
-            actualTile.classList.add("ausente")
-        }
-        if (acerto == width){
-            gameOver = true;
-        }
+        attempts++;
     }
-}
+
+    submitButton.addEventListener('click', () => {
+        //para pasar mayuscula 
+        const guess = input.value.toUpperCase();
+        if (guess.length !== 5) {
+            //validamos que solo se ingresen 5 letras 
+            alert('porfavor ingrese una palabra de 5 letras.');
+            return;
+        }
+        updateBoard(guess);
+        input.value = '';
+        //si acerto la palabra
+        if (guess === secretWord) {
+            alert('Felicidades! has acertado la palabra !');
+            submitButton.disabled = true;
+            input.disabled = true;
+        } else if (attempts === 6) {
+            //si no acergo la palabra 
+            alert('has perdido! la palabra secreta es ' + secretWord);
+            submitButton.disabled = true;
+            input.disabled = true;
+        }
+    });
+
+    createBoard();
+});
